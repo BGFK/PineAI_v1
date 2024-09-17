@@ -182,39 +182,23 @@ export default function FinancialAnalysisApp() {
         deleteChat={deleteChat}
       />
       <div className="flex-1 flex flex-col">
-        <div className="flex-1 overflow-y-auto flex justify-center"> {/* Added flex and justify-center */}
-          <div className="w-[600px]"> {/* Wrapper for content with 600px width */}
-            {!selectedTopic && !showFileManagement ? (
-              <Dashboard
-                topics={[]}
-                createNewChat={createNewChat}
-              />
-            ) : showFileManagement ? (
-              <FileManagement
-                uploadedFiles={uploadedFiles}
-                handleFileUpload={handleFileUpload}
-                fileInputRef={fileInputRef}
-              />
-            ) : (
-              <div className="flex-1 flex flex-col">
-                {isChatOpen && messages.length === 0 ? (
-                  <div className="flex-1 flex items-center justify-center">
-                    <p className="text-2xl text-gray-600">Hi! I am your personal Finance Analyst</p>
-                  </div>
-                ) : (
-                  <div className="h-full overflow-y-auto">
-                    {messages.map((message, index) => (
-                      <div key={index} className={`p-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
-                        {message.text}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+        <div className="flex-1 overflow-y-auto flex items-center justify-center">
+          {messages.length === 0 ? (
+            <p className="text-4xl font-semibold text-[#204B44] text-center leading-relaxed">
+              Hi! I am your personal Finance Analyst<br />
+              How can I help you?
+            </p>
+          ) : (
+            <div className="w-full h-full overflow-y-auto p-4">
+              {messages.map((message, index) => (
+                <div key={index} className={`p-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                  {message.text}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-        <div className="w-full"> {/* Full-width wrapper for ChatInterface */}
+        <div className="w-full">
           <ChatInterface
             messages={messages}
             inputMessage={inputMessage}
