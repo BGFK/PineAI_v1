@@ -1,11 +1,14 @@
 // /app/page.tsx
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, Dispatch, SetStateAction } from 'react'
 import Sidebar from './components/Sidebar'
 import ChatInterface from './components/ChatInterface'
 import FileManagement from './components/FileManagement'
 import Dashboard from './components/Dashboard'
+import { streamMessage, ChatMessage as StreamChatMessage } from '../actions/stream-message';
+import { readStreamableValue } from 'ai/rsc';
+import { useSearchParams } from 'next/navigation';
 
 interface Topic {
   id: number
@@ -17,17 +20,24 @@ interface Chat {
   id: string
   topic: string
   messages: ChatMessage[]
-  label: string | null
+  label?: string // Change from 'string | null' to 'string | undefined'
   date: Date
 }
 
-// Define the ChatMessage interface
+// Update the ChatMessage interface
 export interface ChatMessage {
-  text: string; // The content of the message
-  sender: 'user' | 'ai'; // Indicates who sent the message
-  type?: string; // Optional type property (e.g., 'text', 'image', etc.)
-  timestamp?: Date; // Optional timestamp for when the message was sent
+  id: string;
+  content: string;
+  sender: 'user' | 'ai';
+  type?: string;
+  timestamp?: Date;
 }
+
+// Update or replace the Message interface
+interface Message extends ChatMessage {}
+
+// Remove or comment out this line:
+// setMessages: Dispatch<SetStateAction<Message[]>>;
 
 export default function FinancialAnalysisApp() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
@@ -40,6 +50,25 @@ export default function FinancialAnalysisApp() {
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const chatFileInputRef = useRef<HTMLInputElement | null>(null)
   const [isChatOpen, setIsChatOpen] = useState(false); // {{ edit_1 }} Add state for chat visibility
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [streamedMessage, setStreamedMessage] = useState('');
+
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // Load chat history from localStorage when the component mounts
+    const savedChatHistory = localStorage.getItem('chatHistory');
+    if (savedChatHistory) {
+      const parsedHistory = JSON.parse(savedChatHistory);
+      setChatHistory(parsedHistory);
+
+      // Check if there's a chatId in the URL
+      const chatId = searchParams.get('chatId')
+      if (chatId) {
+        handleChatSelect(chatId)
+      }
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (messages.length > 0 && currentChatId) {
@@ -47,13 +76,18 @@ export default function FinancialAnalysisApp() {
     }
   }, [messages])
 
+  useEffect(() => {
+    // Save chat history to localStorage whenever it changes
+    localStorage.setItem('chatHistory', JSON.stringify(chatHistory));
+  }, [chatHistory]);
+
   const createNewChat = (topic: Topic | null = null) => {
     const newChatId = Date.now().toString()
     const newChat: Chat = {
       id: newChatId,
       topic: topic ? topic.name : 'New Chat',
       messages: [],
-      label: topic ? topic.name : null,
+      label: topic?.name, // Change from 'topic ? topic.name : null' to 'topic?.name'
       date: new Date()
     }
     setChatHistory(prevHistory => [newChat, ...prevHistory])
@@ -68,7 +102,7 @@ export default function FinancialAnalysisApp() {
     setChatHistory(prevHistory =>
       prevHistory.map(chat =>
         chat.id === chatId
-          ? { ...chat, messages: updatedMessages, topic: detectTopic(updatedMessages[0]?.text) }
+          ? { ...chat, messages: updatedMessages, topic: detectTopic(updatedMessages[0]?.content) }
           : chat
       )
     )
@@ -82,16 +116,71 @@ export default function FinancialAnalysisApp() {
     return 'Financial Analysis'
   }
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      const newMessage: ChatMessage = { text: inputMessage, sender: 'user' } // {{ edit_3 }}
-      setMessages(prevMessages => [...prevMessages, newMessage])
-      setInputMessage('')
-      setTimeout(() => {
-        setMessages(prevMessages => [...prevMessages, { text: "I'm analyzing your financial data. Please wait.", sender: 'ai' }])
-      }, 1000)
+  const handleSendMessage = async () => {
+    if (inputMessage.trim() === '') return;
+
+    // Create a new chat if one doesn't exist
+    if (!currentChatId) {
+      createNewChat();
     }
-  }
+
+    const newMessage: ChatMessage = { 
+      id: Date.now().toString(), 
+      content: inputMessage, 
+      sender: 'user' 
+    };
+    setMessages(prevMessages => [...prevMessages, newMessage]);
+    setInputMessage('');
+    setIsStreaming(true);
+
+    try {
+      const streamMessages: StreamChatMessage[] = [
+        ...messages.map((m, index) => ({
+          id: index,
+          role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
+          content: m.content
+        })),
+        {
+          id: messages.length,
+          role: 'user' as const,
+          content: newMessage.content
+        }
+      ];
+
+      const { output } = await streamMessage(streamMessages);
+
+      let fullResponse = '';
+      for await (const chunk of readStreamableValue(output)) {
+        fullResponse += chunk;
+        setStreamedMessage(prevStreamed => prevStreamed + chunk);
+      }
+
+      const aiResponse: ChatMessage = { 
+        id: Date.now().toString(), 
+        content: fullResponse, 
+        sender: 'ai' 
+      };
+      
+      setMessages(prevMessages => [...prevMessages, aiResponse]);
+
+      // Update chat history
+      updateChatHistory(currentChatId!, [...messages, newMessage, aiResponse]);
+    } catch (error) {
+      console.error('Error streaming message:', error);
+      const errorMessage: ChatMessage = { 
+        id: Date.now().toString(), 
+        content: 'Sorry, an error occurred while processing your request.', 
+        sender: 'ai' 
+      };
+      setMessages(prevMessages => [...prevMessages, errorMessage]);
+      
+      // Update chat history with error message
+      updateChatHistory(currentChatId!, [...messages, newMessage, errorMessage]);
+    } finally {
+      setStreamedMessage('');
+      setIsStreaming(false);
+    }
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -107,7 +196,11 @@ export default function FinancialAnalysisApp() {
       setUploadedFiles(prevFiles => [...newFiles, ...prevFiles])
       if (isChat) {
         const fileNames = newFiles.map(file => file.name).join(', ')
-        const newMessage: ChatMessage = { text: `Uploaded files: ${fileNames}`, sender: 'user' } // {{ edit_4 }}
+        const newMessage: ChatMessage = { 
+          id: Date.now().toString(), 
+          content: `Uploaded files: ${fileNames}`, 
+          sender: 'user' 
+        };
         setMessages(prevMessages => [...prevMessages, newMessage])
       }
     }
@@ -166,6 +259,21 @@ export default function FinancialAnalysisApp() {
     }
   };
 
+  const handleRemoveFile = (index: number) => {
+    setUploadedFiles(prevFiles => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleChatSelect = (chatId: string) => {
+    const selectedChat = chatHistory.find(chat => chat.id === chatId);
+    if (selectedChat) {
+      setCurrentChatId(chatId);
+      setMessages(selectedChat.messages);
+      setSelectedTopic({ name: selectedChat.topic } as Topic);
+      setShowFileManagement(false);
+      setIsChatOpen(true);
+    }
+  };
+
   return (
     <div className="flex h-screen bg-white text-gray-800">
       <Sidebar
@@ -180,6 +288,9 @@ export default function FinancialAnalysisApp() {
         setMessages={setMessages}
         groupChatsByDate={groupChatsByDate}
         deleteChat={deleteChat}
+        currentChatId={currentChatId}
+        onChatSelect={handleChatSelect}
+        isMainPage={true}
       />
       <div className="flex-1 flex flex-col">
         <div className="flex-1 overflow-y-auto flex items-center justify-center">
@@ -190,17 +301,14 @@ export default function FinancialAnalysisApp() {
             </p>
           ) : (
             <div className="w-full h-full overflow-y-auto p-4">
-              {messages.map((message, index) => (
-                <div key={index} className={`p-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
-                  {message.text}
-                </div>
-              ))}
+              {/* Message rendering removed */}
             </div>
           )}
         </div>
         <div className="w-full">
           <ChatInterface
             messages={messages}
+            setMessages={setMessages}
             inputMessage={inputMessage}
             setInputMessage={setInputMessage}
             handleSendMessage={handleSendMessage}
@@ -208,6 +316,9 @@ export default function FinancialAnalysisApp() {
             chatFileInputRef={chatFileInputRef}
             handleFileUpload={handleFileUpload}
             uploadedFiles={uploadedFiles}
+            isStreaming={isStreaming}
+            streamedMessage={streamedMessage}
+            handleRemoveFile={handleRemoveFile}
           />
         </div>
       </div>

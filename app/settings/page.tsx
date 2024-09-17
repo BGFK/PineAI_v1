@@ -1,22 +1,63 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import Sidebar from '../components/Sidebar'
-import Header from '../components/Header'
-import { Message } from '@/types' // Updated import path
+import { Message, Chat } from '@/types'
 
 export default function SettingsPage() {
-  // Placeholder state and functions to satisfy Sidebar props
+  const router = useRouter()
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [showFileManagement, setShowFileManagement] = useState(false)
-  const [chatHistory, setChatHistory] = useState([])
-  const [messages, setMessages] = useState<Message[]>([]) // Updated type
+  const [messages, setMessages] = useState<Message[]>([])
+  const [chatHistory, setChatHistory] = useState<Chat[]>([])
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null)
 
-  const createNewChat = () => {}
-  const setCurrentChatId = () => {}
-  const groupChatsByDate = () => ({})
+  useEffect(() => {
+    // Load chat history from localStorage
+    const savedChatHistory = localStorage.getItem('chatHistory');
+    if (savedChatHistory) {
+      setChatHistory(JSON.parse(savedChatHistory));
+    }
+  }, []);
 
-  const deleteChat = () => {} // Add this function
+  const createNewChat = () => {
+    const newChatId = Date.now().toString()
+    const newChat = {
+      id: newChatId,
+      title: 'New Chat',
+      date: new Date(),
+      messages: []
+    } as Chat
+
+    const updatedChatHistory = [newChat, ...chatHistory]
+    setChatHistory(updatedChatHistory)
+    localStorage.setItem('chatHistory', JSON.stringify(updatedChatHistory))
+
+    // Navigate to the home page with the new chat ID
+    router.push(`/?chatId=${newChatId}`)
+  }
+
+  const groupChatsByDate = (): { [key: string]: Chat[] } => {
+    return chatHistory.reduce((groups, chat) => {
+      const date = new Date(chat.date).toDateString();
+      if (!groups[date]) {
+        groups[date] = [];
+      }
+      groups[date].push(chat);
+      return groups;
+    }, {} as { [key: string]: Chat[] });
+  }
+
+  const deleteChat = (id: string) => {
+    // Implement deleteChat logic here
+    // This should be similar to the logic in the main page
+  }
+
+  const handleChatSelect = (chatId: string) => {
+    // This function won't be called directly on the settings page
+    // It's here for type consistency with the Sidebar props
+  }
 
   return (
     <div className="flex h-screen bg-white text-gray-800">
@@ -28,28 +69,14 @@ export default function SettingsPage() {
         setCurrentChatId={setCurrentChatId}
         groupChatsByDate={groupChatsByDate}
         setMessages={setMessages}
-        deleteChat={deleteChat} // Add this prop
+        deleteChat={deleteChat}
+        currentChatId={currentChatId}
+        onChatSelect={handleChatSelect}
+        isMainPage={false} // Add this prop
       />
-      <div className="flex-1 flex flex-col">
-        <Header />
-        <main className="flex-1 overflow-y-auto p-6">
-          <h1 className="text-2xl font-bold mb-6">Settings</h1>
-          {/* Add your settings content here */}
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-xl font-semibold mb-2">General Settings</h2>
-              {/* Add general settings options */}
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Account Settings</h2>
-              {/* Add account settings options */}
-            </div>
-            <div>
-              <h2 className="text-xl font-semibold mb-2">Notification Preferences</h2>
-              {/* Add notification settings options */}
-            </div>
-          </div>
-        </main>
+      <div className="flex-1 p-8">
+        <h1 className="text-2xl font-bold mb-4">Settings</h1>
+        {/* Add your settings content here */}
       </div>
     </div>
   )
