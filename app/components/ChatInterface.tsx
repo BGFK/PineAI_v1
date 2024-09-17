@@ -6,7 +6,6 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { PaperclipIcon, PlusCircle } from 'lucide-react'
-import Image from 'next/image'
 import { ChatMessage } from '../page' // Import ChatMessage from page.tsx
 
 interface ChatInterfaceProps { // Renamed interface for clarity
@@ -33,29 +32,15 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   return (
     <div className="flex-1 flex flex-col">
       {/* Messages Scroll Area */}
-      <ScrollArea className="flex-1 p-4">
-        {/* If no messages, show placeholder image */}
-        {messages.length === 0 ? (
-          <div className="flex justify-center items-center h-full">
-            <Image
-              src="https://example.com/logo.png"
-              alt="Logo"
-              width={150}
-              height={150}
-              className="opacity-50"
-            />
+      <ScrollArea className="flex-1">
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`mb-4 p-3 rounded-lg ${message.sender === 'user' ? 'bg-[#204B44] text-white ml-auto' : 'bg-gray-100 text-gray-800'} max-w-[80%]`}
+          >
+            {message.text}
           </div>
-        ) : (
-          // Render chat messages
-          messages.map((message, index) => (
-            <div
-              key={index}
-              className={`mb-4 p-3 rounded-lg ${message.sender === 'user' ? 'bg-[#204B44] text-white ml-auto' : 'bg-gray-100 text-gray-800'} max-w-[80%]`}
-            >
-              {message.text}
-            </div>
-          ))
-        )}
+        ))}
       </ScrollArea>
 
       {/* File Uploads and Input Section */}

@@ -3,7 +3,6 @@
 
 import React, { useState, useEffect, useRef } from 'react'
 import Sidebar from './components/Sidebar'
-import Header from './components/Header'
 import ChatInterface from './components/ChatInterface'
 import FileManagement from './components/FileManagement'
 import Dashboard from './components/Dashboard'
@@ -30,13 +29,6 @@ export interface ChatMessage {
   timestamp?: Date; // Optional timestamp for when the message was sent
 }
 
-const topics: Topic[] = [
-  { id: 1, name: 'General Financial Analysis', icon: '📊' },
-  { id: 2, name: 'Cost Analysis', icon: '💰' },
-  { id: 3, name: 'Revenue Analysis', icon: '📈' },
-  { id: 4, name: 'Financial Benchmarking', icon: '🏆' },
-]
-
 export default function FinancialAnalysisApp() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([]) // {{ edit_2 }}
@@ -47,7 +39,7 @@ export default function FinancialAnalysisApp() {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
   const fileInputRef = useRef<HTMLInputElement | null>(null)
   const chatFileInputRef = useRef<HTMLInputElement | null>(null)
-  const [isChatOpen, setIsChatOpen] = React.useState(false); // {{ edit_1 }} Add state for chat visibility
+  const [isChatOpen, setIsChatOpen] = useState(false); // {{ edit_1 }} Add state for chat visibility
 
   useEffect(() => {
     if (messages.length > 0 && currentChatId) {
@@ -69,6 +61,7 @@ export default function FinancialAnalysisApp() {
     setSelectedTopic(topic)
     setMessages([])
     setShowFileManagement(false)
+    setIsChatOpen(true); // {{ edit_2 }} Set chat as open when creating a new chat
   }
 
   const updateChatHistory = (chatId: string, updatedMessages: ChatMessage[]) => {
@@ -156,49 +149,83 @@ export default function FinancialAnalysisApp() {
   }
 
   const openNewChat = () => {
-    setIsChatOpen(true); // {{ edit_2 }} Function to open new chat
+    setIsChatOpen(true); // {{ edit_3 }} Function to open new chat
   }
+
+  const handleHomeClick = () => {
+    setSelectedTopic(null)
+    setShowFileManagement(false)
+    setIsChatOpen(false) // {{ edit_4 }} Close chat when returning to home
+  }
+
+  const deleteChat = (chatId: string) => {
+    setChatHistory(prevHistory => prevHistory.filter(chat => chat.id !== chatId));
+    if (currentChatId === chatId) {
+      setCurrentChatId(null);
+      setMessages([]);
+    }
+  };
 
   return (
     <div className="flex h-screen bg-white text-gray-800">
       <Sidebar
         chatHistory={chatHistory}
-        setSelectedTopic={setSelectedTopic}
+        setSelectedTopic={(topic) => {
+          setSelectedTopic(topic)
+          handleHomeClick()
+        }}
         setShowFileManagement={setShowFileManagement}
         createNewChat={createNewChat}
         setCurrentChatId={setCurrentChatId}
         setMessages={setMessages}
         groupChatsByDate={groupChatsByDate}
+        deleteChat={deleteChat}
       />
       <div className="flex-1 flex flex-col">
-        <Header />
-        {!selectedTopic && !showFileManagement ? (
-          <Dashboard
-            topics={topics}
-            createNewChat={createNewChat}
-          />
-        ) : showFileManagement ? (
-          <FileManagement
-            uploadedFiles={uploadedFiles}
-            handleFileUpload={handleFileUpload}
-            fileInputRef={fileInputRef}
-          />
-        ) : (
-          <div>
-            {isChatOpen && ( // {{ edit_3 }} Conditional rendering of ChatInterface
-              <ChatInterface
-                messages={messages} // Ensure ChatInterface expects ChatMessage[] type
-                inputMessage={inputMessage}
-                setInputMessage={setInputMessage}
-                handleSendMessage={handleSendMessage}
-                handleKeyPress={handleKeyPress}
-                chatFileInputRef={chatFileInputRef}
-                handleFileUpload={handleFileUpload}
-                uploadedFiles={uploadedFiles}
+        <div className="flex-1 overflow-y-auto flex justify-center"> {/* Added flex and justify-center */}
+          <div className="w-[600px]"> {/* Wrapper for content with 600px width */}
+            {!selectedTopic && !showFileManagement ? (
+              <Dashboard
+                topics={[]}
+                createNewChat={createNewChat}
               />
+            ) : showFileManagement ? (
+              <FileManagement
+                uploadedFiles={uploadedFiles}
+                handleFileUpload={handleFileUpload}
+                fileInputRef={fileInputRef}
+              />
+            ) : (
+              <div className="flex-1 flex flex-col">
+                {isChatOpen && messages.length === 0 ? (
+                  <div className="flex-1 flex items-center justify-center">
+                    <p className="text-2xl text-gray-600">Hi! I am your personal Finance Analyst</p>
+                  </div>
+                ) : (
+                  <div className="h-full overflow-y-auto">
+                    {messages.map((message, index) => (
+                      <div key={index} className={`p-2 ${message.sender === 'user' ? 'text-right' : 'text-left'}`}>
+                        {message.text}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             )}
           </div>
-        )}
+        </div>
+        <div className="w-full"> {/* Full-width wrapper for ChatInterface */}
+          <ChatInterface
+            messages={messages}
+            inputMessage={inputMessage}
+            setInputMessage={setInputMessage}
+            handleSendMessage={handleSendMessage}
+            handleKeyPress={handleKeyPress}
+            chatFileInputRef={chatFileInputRef}
+            handleFileUpload={handleFileUpload}
+            uploadedFiles={uploadedFiles}
+          />
+        </div>
       </div>
     </div>
   )
