@@ -17,8 +17,10 @@ const buttonVariants = cva(
           "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: cn("hover:bg-accent hover:text-accent-foreground", OtherText),
+        ghost: cn(OtherText),  // Removed hover effect
         link: "text-primary underline-offset-4 hover:underline",
+        // Add a new variant for chat items
+        chatItem: cn("hover:bg-transparent", OtherText),
       },
       size: {
         default: "h-10 px-4 py-2",

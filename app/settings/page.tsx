@@ -6,7 +6,7 @@ import Sidebar from '../components/Sidebar'
 import { Message, Chat } from '@/types'
 import { colors } from '../../components/ui/colors'
 
-export default function SettingsPage() {
+const SettingsPage: React.FC = () => {
   const router = useRouter()
   const [selectedTopic, setSelectedTopic] = useState(null)
   const [showFileManagement, setShowFileManagement] = useState(false)
@@ -97,3 +97,5 @@ export default function SettingsPage() {
     </div>
   )
 }
+
+export default SettingsPage

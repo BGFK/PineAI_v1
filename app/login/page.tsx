@@ -109,17 +109,17 @@ export default function LoginPage() {
         </div>
         <div className="mt-6 text-center text-sm text-gray-500">ODER</div>
         <div className="mt-4 space-y-3">
-          <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-50">
+          <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center space-x-3 hover:bg-gray-50">
             <Image src="/google-icon.png" alt="Google" width={20} height={20} />
-            <span>Fortfahren mit Google</span>
+            <span className="text-sm">Fortfahren mit Google</span>
           </button>
-          <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-50">
+          <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center space-x-3 hover:bg-gray-50">
             <Image src="/microsoft-icon.png" alt="Microsoft" width={20} height={20} />
-            <span>Fortfahren mit Microsoft Account</span>
+            <span className="text-sm">Fortfahren mit Microsoft Account</span>
           </button>
-          <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center justify-center space-x-2 hover:bg-gray-50">
+          <button className="w-full py-2 px-4 border border-gray-300 rounded-md flex items-center space-x-3 hover:bg-gray-50">
             <Image src="/apple-icon.png" alt="Apple" width={20} height={20} />
-            <span>Fortfahren mit Apple</span>
+            <span className="text-sm">Fortfahren mit Apple</span>
           </button>
         </div>
       </div>

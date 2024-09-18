@@ -66,6 +66,8 @@ export default function FileManagementPage() {
     setUploadedFiles(prevFiles => [...files, ...prevFiles]);
   };
 
+  const refreshHomePage = () => {} // Add this dummy function
+
   return (
     <div className="flex h-screen bg-white text-gray-800">
       <Sidebar

@@ -1,21 +1,20 @@
 // /app/components/ChatInterface.tsx
 'use client'
 
-import React from 'react'
+import React, { useState } from 'react'
 import { readStreamableValue } from 'ai/rsc';
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { PaperclipIcon, AddIcon, DiscardIcon } from '@/components/ui/icons'
-import { ChatMessage } from '../page' // Import ChatMessage from page.tsx
+import { ChatMessage } from '../home/page' // Import ChatMessage from page.tsx
 import { streamMessage, ChatMessage as StreamChatMessage } from '../../actions/stream-message';
-import { useEffect, useState } from 'react';
 
 interface ChatInterfaceProps { // Renamed interface for clarity
   messages: ChatMessage[]; // Accept ChatMessage[] type
   inputMessage: string;
   setInputMessage: (message: string) => void;
-  handleSendMessage: () => void;
+  onSendMessage: (message: string) => void; // Renamed from handleSendMessage
   handleKeyPress: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   chatFileInputRef: React.RefObject<HTMLInputElement>;
   handleFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
@@ -30,72 +29,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   messages,
   inputMessage,
   setInputMessage,
-  handleSendMessage: propHandleSendMessage,
+  onSendMessage, // This prop is now used
   handleKeyPress,
   chatFileInputRef,
   handleFileUpload,
   uploadedFiles,
   setMessages,
-  handleRemoveFile, // Add this prop
+  isStreaming,
+  streamedMessage,
+  handleRemoveFile,
 }) => {
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamedMessage, setStreamedMessage] = useState('');
-
-  const handleSendMessage = async () => {
-    if (inputMessage.trim() === '') return;
-
-    // Create a new message object that matches the ChatMessage type
-    const newUserMessage: ChatMessage = {
-      id: messages.length.toString(),
-      sender: 'user',
-      content: inputMessage
-    };
-
-    // Add the user message immediately
-    setMessages(prevMessages => [...prevMessages, newUserMessage]);
-
-    const currentInputMessage = inputMessage;
-    setInputMessage(''); // Clear input field
-    setIsStreaming(true);
-
-    try {
-      const streamMessages: StreamChatMessage[] = [
-        ...messages.map((m, index) => ({
-          id: index,
-          role: m.sender === 'user' ? 'user' as const : 'assistant' as const,
-          content: m.content
-        })),
-        {
-          id: messages.length,
-          role: 'user' as const,
-          content: currentInputMessage
-        }
-      ];
-
-      const { output } = await streamMessage(streamMessages);
-
-      let fullResponse = '';
-      for await (const chunk of readStreamableValue(output)) {
-        fullResponse += chunk;
-        setStreamedMessage(prevStreamed => prevStreamed + chunk);
-      }
-
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { id: (prevMessages.length + 1).toString(), sender: 'ai', content: fullResponse }
-      ]);
-    } catch (error) {
-      console.error('Error streaming message:', error);
-      setMessages(prevMessages => [
-        ...prevMessages,
-        { id: (prevMessages.length + 1).toString(), sender: 'ai', content: 'Sorry, an error occurred while processing your request.' }
-      ]);
-    } finally {
-      setStreamedMessage('');
-      setIsStreaming(false);
-    }
-  };
-
+  // Remove the local state and handleSendMessage function
+  
   return (
     <div className="flex flex-col items-center w-full">
       {/* Messages Scroll Area */}
@@ -165,7 +110,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               placeholder="Ask about your financial data..."
               className="flex-1"
             />
-            <Button onClick={handleSendMessage} className="bg-[#204B44] hover:bg-[#1a3e39] text-white">
+            <Button onClick={() => onSendMessage(inputMessage)} className="bg-[#204B44] hover:bg-[#1a3e39] text-white">
               Send
             </Button>
           </div>

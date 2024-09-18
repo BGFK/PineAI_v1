@@ -42,7 +42,7 @@ interface Message extends ChatMessage {}
 export default function FinancialAnalysisApp() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null)
   const [messages, setMessages] = useState<ChatMessage[]>([]) // {{ edit_2 }}
-  const [inputMessage, setInputMessage] = useState<string>('')
+  const [inputMessage, setInputMessage] = useState<string>('') // Updated to initialize with an empty string
   const [chatHistory, setChatHistory] = useState<Chat[]>([])
   const [currentChatId, setCurrentChatId] = useState<string | null>(null)
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
@@ -68,7 +68,7 @@ export default function FinancialAnalysisApp() {
         handleChatSelect(chatId)
       }
     }
-  }, [searchParams]);
+  }, [searchParams]); // Add searchParams as a dependency
 
   useEffect(() => {
     if (messages.length > 0 && currentChatId) {
@@ -305,7 +305,7 @@ export default function FinancialAnalysisApp() {
             setMessages={setMessages}
             inputMessage={inputMessage}
             setInputMessage={setInputMessage}
-            handleSendMessage={handleSendMessage}
+            onSendMessage={handleSendMessage}
             handleKeyPress={handleKeyPress}
             chatFileInputRef={chatFileInputRef}
             handleFileUpload={handleFileUpload}
@@ -319,4 +319,3 @@ export default function FinancialAnalysisApp() {
     </div>
   )
 }
-
