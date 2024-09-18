@@ -55,9 +55,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   }, [])
 
   const handleHomeClick = () => {
-    setSelectedTopic(null)
-    setShowFileManagement(false)
-    router.push('/')
+    // Navigate to the home page (app/home/page.tsx)
+    router.push('/home')
   }
 
   const handleSettingsClick = () => {
@@ -83,6 +82,10 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
     return 'Current Chat';
   };
+
+  const handleFileManagementClick = () => {
+    router.push('/file-management')
+  }
 
   return (
     <div className="w-64 bg-gray-50 border-r border-gray-200 flex flex-col">
@@ -190,7 +193,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <Button
           className="w-full justify-start text-left hover:bg-gray-100 py-2.5 px-3"
           variant="ghost"
-          onClick={() => setShowFileManagement(true)}
+          onClick={handleFileManagementClick}
         >
           <FolderIcon className="mr-3 h-5 w-5" />
           File Management

@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '../components/Sidebar'
 import { Message, Chat } from '@/types'
+import { colors } from '../../components/ui/colors'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -59,6 +60,11 @@ export default function SettingsPage() {
     // It's here for type consistency with the Sidebar props
   }
 
+  const handleLogout = () => {
+    // Implement logout logic here if needed
+    router.push('/') // Navigate to the login page
+  }
+
   return (
     <div className="flex h-screen bg-white text-gray-800">
       <Sidebar
@@ -74,9 +80,19 @@ export default function SettingsPage() {
         onChatSelect={handleChatSelect}
         isMainPage={false} // Add this prop
       />
-      <div className="flex-1 p-8">
+      <div className="flex-1 p-8 flex flex-col">
         <h1 className="text-2xl font-bold mb-4">Settings</h1>
         {/* Add your settings content here */}
+        <div className="flex-grow"></div>
+        <div className="flex justify-center">
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 rounded text-white"
+            style={{ backgroundColor: colors.pine['Pine Green'] }}
+          >
+            Log Out
+          </button>
+        </div>
       </div>
     </div>
   )
