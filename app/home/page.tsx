@@ -118,9 +118,14 @@ export default function FinancialAnalysisApp() {
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return;
 
-    // Create a new chat if one doesn't exist
+    let newChatId = currentChatId;
+    let isNewChat = false;
+
+    // Create a new chat entry if there's no current chat
     if (!currentChatId) {
-      createNewChat();
+      newChatId = Date.now().toString();
+      setCurrentChatId(newChatId);
+      isNewChat = true;
     }
 
     const newMessage: ChatMessage = { 
@@ -162,8 +167,18 @@ export default function FinancialAnalysisApp() {
       
       setMessages(prevMessages => [...prevMessages, aiResponse]);
 
-      // Update chat history
-      updateChatHistory(currentChatId!, [...messages, newMessage, aiResponse]);
+      // After successfully sending the message and getting a response:
+      if (isNewChat) {
+        const newChat: Chat = {
+          id: newChatId!,
+          topic: detectTopic(inputMessage),
+          messages: [newMessage, aiResponse],
+          date: new Date()
+        };
+        setChatHistory(prevHistory => [newChat, ...prevHistory]);
+      } else {
+        updateChatHistory(newChatId!, [...messages, newMessage, aiResponse]);
+      }
     } catch (error) {
       console.error('Error streaming message:', error);
       const errorMessage: ChatMessage = { 
@@ -174,7 +189,17 @@ export default function FinancialAnalysisApp() {
       setMessages(prevMessages => [...prevMessages, errorMessage]);
       
       // Update chat history with error message
-      updateChatHistory(currentChatId!, [...messages, newMessage, errorMessage]);
+      if (isNewChat) {
+        const newChat: Chat = {
+          id: newChatId!,
+          topic: 'Error',
+          messages: [newMessage, errorMessage],
+          date: new Date()
+        };
+        setChatHistory(prevHistory => [newChat, ...prevHistory]);
+      } else {
+        updateChatHistory(newChatId!, [...messages, newMessage, errorMessage]);
+      }
     } finally {
       setStreamedMessage('');
       setIsStreaming(false);
@@ -254,6 +279,7 @@ export default function FinancialAnalysisApp() {
     if (currentChatId === chatId) {
       setCurrentChatId(null);
       setMessages([]);
+      createNewChat(); // This will create a new chat immediately
     }
   };
 
@@ -284,7 +310,7 @@ export default function FinancialAnalysisApp() {
         currentChatId={currentChatId}
         onChatSelect={handleChatSelect}
         isMainPage={true}
-        setShowFileManagement={setShowFileManagement} // Add this line
+        setShowFileManagement={setShowFileManagement}
       />
       <div className="flex-1 flex flex-col">
         <div className="flex-1 overflow-y-auto flex items-center justify-center">

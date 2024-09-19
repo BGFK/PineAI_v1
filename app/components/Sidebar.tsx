@@ -16,6 +16,8 @@ import { Chat, Message } from '@/types'
 import { colors } from '@/components/ui/colors'
 import { cn } from "@/lib/utils"  // Make sure this utility is imported
 import dynamic from 'next/dynamic'
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { OptionsIcon, PenSquareIcon, ArchiveIcon, TrashIcon } from '@/components/ui/icons'
 
 const DynamicChatInterface = dynamic(() => import('../components/ChatInterface'), { ssr: false })
 
@@ -24,7 +26,7 @@ interface SidebarProps {
   setSelectedTopic: (topic: any) => void
   setShowFileManagement: (value: boolean) => void
   createNewChat: () => void
-  setCurrentChatId: (id: string) => void
+  setCurrentChatId: (id: string | null) => void
   setMessages: React.Dispatch<React.SetStateAction<Message[]>>;
   groupChatsByDate: () => { [key: string]: Chat[] }
   deleteChat: (id: string) => void
@@ -51,6 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [hoveredChatId, setHoveredChatId] = useState<string | null>(null)
   const [localChatHistory, setLocalChatHistory] = useState<Chat[]>([])
   const [showNewChatTooltip, setShowNewChatTooltip] = useState(false)
+  const [openPopoverId, setOpenPopoverId] = useState<string | null>(null)
 
   useEffect(() => {
     // Load chat history from localStorage when the component mounts
@@ -67,6 +70,11 @@ const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [searchParams, onChatSelect])
 
+  useEffect(() => {
+    // Close any open popover when the chat history changes
+    setOpenPopoverId(null);
+  }, [chatHistory]);
+
   const handleHomeClick = () => {
     // Navigate to the home page (app/home/page.tsx)
     router.push('/home')
@@ -79,6 +87,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleChatClick = (chatId: string) => {
     if (isMainPage) {
       onChatSelect(chatId);
+      // Close any open popover when selecting a chat
+      setOpenPopoverId(null);
     }
   };
 
@@ -102,8 +112,22 @@ const Sidebar: React.FC<SidebarProps> = ({
   const handleNewChat = () => {
     if (chatHistory.length > 0) {
       createNewChat();
+      // Ensure the popover is closed when creating a new chat
+      setOpenPopoverId(null);
     }
   };
+
+  const handleDeleteChat = (chatId: string) => {
+    deleteChat(chatId);
+    setOpenPopoverId(null);
+    
+    if (chatId === currentChatId) {
+      setCurrentChatId(null);
+      setMessages([]);
+      // Instead of creating a new chat, we'll reset the state to show the welcome message
+      router.push('/home'); // This will force a re-render of the main page
+    }
+  }
 
   return (
     <div className="w-[280px] flex flex-col" style={{ backgroundColor: colors.pine['Pine Sidebar Background'] }}>
@@ -168,47 +192,53 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <div className="space-y-0">
                   {chats.map((chat) => (
                     <div key={chat.id} className="flex items-center">
-                      {isMainPage ? (
-                        <Button
-                          className="flex-grow justify-start text-left font-normal py-2.5 px-3 bg-gray-50 relative w-full"
-                          variant="ghost"
-                          onClick={() => handleChatClick(chat.id)}
-                        >
-                          <div className="flex items-center w-full pr-8">
-                            <MessageIcon className="mr-3 h-5 w-5 flex-shrink-0" />
-                            <div className="flex-grow overflow-hidden">
-                              <BodyText className="truncate">
-                                {getFirstMessagePreview(chat)}
-                              </BodyText>
-                              {chat.label && (
-                                <SmallText className="px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full mt-1 inline-block">
-                                  {chat.label}
-                                </SmallText>
-                              )}
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="p-2 absolute right-1 top-1/2 transform -translate-y-1/2"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                deleteChat(chat.id);
-                              }}
-                            >
-                              <DeleteIcon className="h-5 w-5 text-gray-500 transition-colors duration-200 ease-in-out hover:text-gray-700" />
-                            </Button>
+                      <Button
+                        className={cn(
+                          "flex-grow justify-start text-left font-normal py-2.5 px-3 bg-gray-50 relative w-full",
+                          chat.id === currentChatId && "bg-gray-200"
+                        )}
+                        variant="ghost"
+                        onClick={() => handleChatClick(chat.id)}
+                      >
+                        <div className="flex items-center w-full pr-8">
+                          <MessageIcon className="mr-3 h-5 w-5 flex-shrink-0" />
+                          <div className="flex-grow overflow-hidden">
+                            <BodyText className="truncate">
+                              {getFirstMessagePreview(chat)}
+                            </BodyText>
+                            {chat.label && (
+                              <SmallText className="px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full mt-1 inline-block">
+                                {chat.label}
+                              </SmallText>
+                            )}
                           </div>
-                        </Button>
-                      ) : (
-                        <Link href={`/chat/${chat.id}`} className="w-full">
-                          <Button
-                            className="flex-grow justify-start text-left font-normal py-2.5 px-3 bg-gray-50 relative w-full"
-                            variant="ghost"
+                          <Popover 
+                            open={openPopoverId === chat.id} 
+                            onOpenChange={(open) => {
+                              if (!open) {
+                                setOpenPopoverId(null);
+                              }
+                            }}
                           >
-                            {/* Similar content as the isMainPage true case */}
-                          </Button>
-                        </Link>
-                      )}
+                            <PopoverTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="p-2 absolute right-1 top-1/2 transform -translate-y-1/2"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setOpenPopoverId(openPopoverId === chat.id ? null : chat.id);
+                                }}
+                              >
+                                <OptionsIcon className="h-5 w-5 text-gray-500 transition-colors duration-200 ease-in-out hover:text-gray-700" />
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent onDelete={() => handleDeleteChat(chat.id)}>
+                              {/* The content is now defined in the PopoverContent component */}
+                            </PopoverContent>
+                          </Popover>
+                        </div>
+                      </Button>
                     </div>
                   ))}
                 </div>

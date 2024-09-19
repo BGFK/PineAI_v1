@@ -5,7 +5,7 @@ interface IconProps {
   className?: string
 }
 
-const iconStyle = "h-5 w-5"  // default style
+const iconStyle = "h-4 w-4"  // reduced size
 
 export const HomeIcon: React.FC<IconProps> = ({ className = "" }) => (
   <Home className={`${iconStyle} ${className}`} />
