@@ -6,7 +6,7 @@ interface TextProps {
 }
 
 export const Heading = ({ children, className = '' }: TextProps) => (
-  <h2 className={`text-lg font-medium ${className}`}>{children}</h2>
+  <h2 className={`text-base font-normal ${className}`}>{children}</h2>
 );
 
 export const Subheading = ({ children, className = '' }: TextProps) => (
@@ -14,7 +14,7 @@ export const Subheading = ({ children, className = '' }: TextProps) => (
 );
 
 export const BodyText = ({ children, className = '' }: TextProps) => (
-  <p className={`text-sm font-normal ${className}`}>{children}</p>
+  <p className={`text-xs font-normal ${className}`}>{children}</p>
 );
 
 export const SmallText = ({ children, className = '' }: TextProps) => (

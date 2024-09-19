@@ -1,5 +1,5 @@
 import React from 'react'
-import { Home, MessageSquare, PlusCircle, Folder, Settings, User, Trash2, Paperclip, X, PenSquare, Plus } from 'lucide-react'
+import { Home, MessageSquare, PlusCircle, Folder, Settings, User, Trash2, Paperclip, X, PenSquare, Plus, MoreHorizontal, Archive } from 'lucide-react'
 
 interface IconProps {
   className?: string
@@ -49,4 +49,20 @@ export const AddTextIcon: React.FC<IconProps> = ({ className = "" }) => (
 
 export const NewChatIcon: React.FC<IconProps> = ({ className = "" }) => (
   <PenSquare className={`${iconStyle} ${className}`} />
+)
+
+export const OptionsIcon: React.FC<IconProps> = ({ className = "" }) => (
+  <MoreHorizontal className={`${iconStyle} ${className}`} />
+)
+
+export const PenSquareIcon: React.FC<IconProps> = ({ className = "" }) => (
+  <PenSquare className={`${iconStyle} ${className}`} />
+)
+
+export const ArchiveIcon: React.FC<IconProps> = ({ className = "" }) => (
+  <Archive className={`${iconStyle} ${className}`} />
+)
+
+export const TrashIcon: React.FC<IconProps> = ({ className = "" }) => (
+  <Trash2 className={`${iconStyle} ${className}`} />
 )

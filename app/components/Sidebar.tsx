@@ -106,9 +106,9 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
 
   return (
-    <div className="w-[280px] bg-gray-50 border-r border-gray-200 flex flex-col">
+    <div className="w-[280px] flex flex-col" style={{ backgroundColor: colors.pine['Pine Sidebar Background'] }}>
       <div className="p-4">
-        <div className="mb-8 pl-3"> {/* Added pl-3 to align with button content */}
+        <div className="mb-8 pl-3">
           <Image
             src="/pine_logo_green_text.png"
             alt="Pine Logo"
@@ -119,6 +119,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           />
         </div>
         <div className="space-y-2">
+          {/* Home button */}
           <div className="flex items-center justify-between w-full bg-gray-50 hover:bg-gray-100 rounded-md">
             <Button
               className="flex-grow flex justify-start items-center text-left py-2.5 px-3"
@@ -128,9 +129,10 @@ const Sidebar: React.FC<SidebarProps> = ({
               <HomeIcon className="h-5 w-5 mr-3" />
               <Heading>Home</Heading>
             </Button>
+            {/* New Chat button */}
             <div className="pr-3 flex items-center h-full">
               <Button
-                className={`p-0 w-5 h-5 hover:bg-gray-200 ${chatHistory.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                className={`p-0 w-5 h-5 hover:bg-gray-200 ${chatHistory.length === 0 ? 'opacity-70 cursor-not-allowed' : ''}`}
                 variant="ghost"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -143,8 +145,20 @@ const Sidebar: React.FC<SidebarProps> = ({
               </Button>
             </div>
           </div>
+          
+          {/* File Management button */}
+          <Button
+            className="w-full justify-start text-left hover:bg-gray-100 py-2.5 px-3"
+            variant="ghost"
+            onClick={handleFileManagementClick}
+          >
+            <FolderIcon className="mr-3 h-5 w-5" />
+            <Heading>File Management</Heading>
+          </Button>
         </div>
       </div>
+      
+      {/* Chat history */}
       <ScrollArea className="flex-1 pt-1">
         <div className="px-4 space-y-4">
           {Object.entries(groupChatsByDate()).map(([group, chats]) => (
@@ -203,17 +217,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </div>
       </ScrollArea>
-      <Separator />
-      <div className="p-4">
-        <Button
-          className="w-full justify-start text-left hover:bg-gray-100 py-2.5 px-3"
-          variant="ghost"
-          onClick={handleFileManagementClick}
-        >
-          <FolderIcon className="mr-3 h-5 w-5" />
-          File Management
-        </Button>
-      </div>
       <Separator />
       <div className="p-4 space-y-2">
         <Button 
