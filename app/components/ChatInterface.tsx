@@ -7,8 +7,10 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { PaperclipIcon, AddIcon, DiscardIcon } from '@/components/ui/icons'
-import { ChatMessage } from '../home/page' // Import ChatMessage from page.tsx
+import { ChatMessage } from '../PineChat/page' // Import ChatMessage from page.tsx
 import { streamMessage, ChatMessage as StreamChatMessage } from '../../actions/stream-message';
+import { chatText } from '@/components/ui/typography'
+import { colors } from '@/components/ui/colors'
 
 interface ChatInterfaceProps { // Renamed interface for clarity
   messages: ChatMessage[]; // Accept ChatMessage[] type
@@ -52,23 +54,16 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
             >
               <div
-                className={`p-3 rounded-lg ${
+                className={`p-2 rounded-lg ${
                   message.sender === 'user' 
-                    ? 'bg-[#204B44] text-white' 
-                    : 'bg-gray-100 text-gray-800'
-                } inline-block max-w-[80%]`}
+                    ? `bg-[${colors.pine['Pine Green']}] text-white` 
+                    : `bg-gray-100 text-${colors.pine['Pine Main Text']}`
+                } inline-block max-w-[80%] ${chatText}`}
               >
                 {message.content}
               </div>
             </div>
           ))}
-          {isStreaming && streamedMessage && (
-            <div className="flex justify-start">
-              <div className="p-3 rounded-lg bg-gray-100 text-gray-800 inline-block max-w-[80%]">
-                {streamedMessage}
-              </div>
-            </div>
-          )}
         </div>
       </ScrollArea>
 
@@ -108,9 +103,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about your financial data..."
-              className="flex-1"
+              className={`flex-1 ${chatText} text-${colors.pine['Pine Main Text']}`}
             />
-            <Button onClick={() => onSendMessage(inputMessage)} className="bg-[#204B44] hover:bg-[#1a3e39] text-white">
+            <Button onClick={() => onSendMessage(inputMessage)} className={`bg-[${colors.pine['Pine Green']}] hover:bg-[#1a3e39] text-white ${chatText}`}>
               Send
             </Button>
           </div>

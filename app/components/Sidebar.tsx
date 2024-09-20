@@ -130,33 +130,33 @@ const Sidebar: React.FC<SidebarProps> = ({
   }
 
   return (
-    <div className="w-[280px] flex flex-col" style={{ backgroundColor: colors.pine['Pine Sidebar Background'] }}>
-      <div className="p-4">
-        <div className="mb-8 pl-3">
+    <div className="w-[250px] flex flex-col" style={{ backgroundColor: colors.pine['Pine Sidebar Background'] }}>
+      <div className="p-3">
+        <div className="mb-8 pl-2">
           <Image
             src="/pine_logo_green_text.png"
             alt="Pine Logo"
             width={160}
             height={53}
-            style={{ width: '80%', height: 'auto' }}
+            style={{ width: '70%', height: 'auto' }}
             priority
           />
         </div>
-        <div className="space-y-2">
+        <div className="space-y-0">
           {/* Home button */}
-          <div className="flex items-center justify-between w-full bg-gray-50 hover:bg-gray-100 rounded-md">
+          <div className="flex items-center justify-between w-full bg-gray-50 hover:bg-gray-100 rounded-md h-[38px]">
             <Button
-              className="flex-grow flex justify-start items-center text-left py-2.5 px-3"
+              className="flex-grow flex justify-start items-center text-left py-1 px-3 h-full"
               variant="ghost"
               onClick={handleHomeClick}
             >
-              <HomeIcon className="h-5 w-5 mr-3" />
-              <Heading>Home</Heading>
+              <HomeIcon className="h-4 w-4 mr-3" />
+              <Heading>PineChat</Heading>
             </Button>
             {/* New Chat button */}
             <div className="pr-3 flex items-center h-full">
               <Button
-                className={`p-0 w-5 h-5 hover:bg-gray-200 ${chatHistory.length === 0 ? 'opacity-70 cursor-not-allowed' : ''}`}
+                className={`p-0 w-4 h-full hover:bg-gray-200 ${chatHistory.length === 0 ? 'opacity-70 cursor-not-allowed' : ''}`}
                 variant="ghost"
                 onClick={(e) => {
                   e.stopPropagation();
@@ -165,52 +165,46 @@ const Sidebar: React.FC<SidebarProps> = ({
                 title={chatHistory.length > 0 ? "New Chat" : "Create your first chat to enable this button"}
                 disabled={chatHistory.length === 0}
               >
-                <NewChatIcon className="h-5 w-5" />
+                <NewChatIcon className="h-4 w-5" />
               </Button>
             </div>
           </div>
           
           {/* File Management button */}
           <Button
-            className="w-full justify-start text-left hover:bg-gray-100 py-2.5 px-3"
+            className="w-full justify-start text-left hover:bg-gray-100 py-1 px-3 h-[38px]"
             variant="ghost"
             onClick={handleFileManagementClick}
           >
-            <FolderIcon className="mr-3 h-5 w-5" />
-            <Heading>File Management</Heading>
+            <FolderIcon className="mr-3 h-4 w-4" />
+            <Heading>Files</Heading>
           </Button>
         </div>
       </div>
       
       {/* Chat history */}
       <ScrollArea className="flex-1 pt-1">
-        <div className="px-4 space-y-4">
+        <div className="p-3 space-y-4">
           {Object.entries(groupChatsByDate()).map(([group, chats]) => (
             chats.length > 0 && (
               <div key={group} className="space-y-1">
-                <SmallText className="text-gray-500 px-3">{group}</SmallText>
+                <BodyText className={cn("px-3", colors.pine['Pine Secondary Text'])}>{group}</BodyText>
                 <div className="space-y-0">
                   {chats.map((chat) => (
                     <div key={chat.id} className="flex items-center">
                       <Button
-                        className={cn(
-                          "flex-grow justify-start text-left font-normal py-2.5 px-3 bg-gray-50 relative w-full",
-                          chat.id === currentChatId && "bg-gray-200"
-                        )}
-                        variant="ghost"
+                        className="flex-grow justify-start text-left font-normal py-1 px-3 relative w-full h-[34px]"
+                        style={{
+                          backgroundColor: chat.id === currentChatId ? colors.pine['Pine_ChatBox_Selected'] : '#F9FAFB'
+                        }}
+                        variant="chatItem"
                         onClick={() => handleChatClick(chat.id)}
                       >
                         <div className="flex items-center w-full pr-8">
-                          <MessageIcon className="mr-3 h-5 w-5 flex-shrink-0" />
                           <div className="flex-grow overflow-hidden">
                             <BodyText className="truncate">
                               {getFirstMessagePreview(chat)}
                             </BodyText>
-                            {chat.label && (
-                              <SmallText className="px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full mt-1 inline-block">
-                                {chat.label}
-                              </SmallText>
-                            )}
                           </div>
                           <Popover 
                             open={openPopoverId === chat.id} 
@@ -230,7 +224,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                                   setOpenPopoverId(openPopoverId === chat.id ? null : chat.id);
                                 }}
                               >
-                                <OptionsIcon className="h-5 w-5 text-gray-500 transition-colors duration-200 ease-in-out hover:text-gray-700" />
+                                <OptionsIcon className="h-4 w-5 text-gray-500 transition-colors duration-200 ease-in-out hover:text-gray-700" />
                               </Button>
                             </PopoverTrigger>
                             <PopoverContent onDelete={() => handleDeleteChat(chat.id)}>
@@ -247,28 +241,21 @@ const Sidebar: React.FC<SidebarProps> = ({
           ))}
         </div>
       </ScrollArea>
-      <Separator />
-      <div className="p-4 space-y-2">
+      <div className="p-3 space-y-0">
         <Button 
-          className="w-full justify-start text-left font-normal hover:bg-gray-100 py-2.5 px-3" 
+          className="w-full justify-start text-left font-normal hover:bg-gray-100 py-1 px-3 h-[38px]" 
           variant="ghost"
         >
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-5 w-5">
-              <AvatarFallback>
-                <UserIcon className="h-4 w-4" />
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-sm">user@example.com</span>
-          </div>
+          <UserIcon className="mr-3 h-4 w-5" />
+          <Heading>user@example.com</Heading>
         </Button>
         <Button 
-          className="w-full justify-start text-left font-normal hover:bg-gray-100 py-2.5 px-3" 
+          className="w-full justify-start text-left font-normal hover:bg-gray-100 py-1 px-3 h-[38px]" 
           variant="ghost"
           onClick={handleSettingsClick}
         >
-          <SettingsIcon className="mr-3 h-5 w-5" />
-          Settings
+          <SettingsIcon className="mr-3 h-4 w-5" />
+          <Heading>Settings</Heading>
         </Button>
       </div>
     </div>

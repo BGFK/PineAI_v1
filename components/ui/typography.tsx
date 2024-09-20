@@ -6,19 +6,22 @@ interface TextProps {
 }
 
 export const Heading = ({ children, className = '' }: TextProps) => (
-  <h2 className={`text-base font-normal ${className}`}>{children}</h2>
+  <h2 className={`text-[13px] font-normal ${className}`}>{children}</h2>
 );
 
 export const Subheading = ({ children, className = '' }: TextProps) => (
-  <h3 className={`text-sm font-medium ${className}`}>{children}</h3>
+  <h3 className={`text-[12px] font-medium ${className}`}>{children}</h3>
 );
 
 export const BodyText = ({ children, className = '' }: TextProps) => (
-  <p className={`text-xs font-normal ${className}`}>{children}</p>
+  <p className={`text-[12px] font-normal ${className}`}>{children}</p>
 );
 
 export const SmallText = ({ children, className = '' }: TextProps) => (
   <span className={`text-sm font-normal ${className}`}>{children}</span>
 );
 
-export const OtherText = "text-sm font-medium"; // Change to a string instead of a component
+export const OtherText = "text-sm font-medium";
+
+// Rename chatTextClass to chatText
+export const chatText = "text-[13px] font-light";

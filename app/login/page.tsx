@@ -12,18 +12,37 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isEmailEntered, setIsEmailEntered] = useState(false)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
+  const [isValidEmail, setIsValidEmail] = useState(false)
+  const [isValidPassword, setIsValidPassword] = useState(false)
   const router = useRouter()
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return re.test(email)
+  }
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newEmail = e.target.value
+    setEmail(newEmail)
+    setIsValidEmail(validateEmail(newEmail))
+  }
 
   const handleEmailSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (email.trim() !== '') {
+    if (isValidEmail) {
       setIsEmailEntered(true)
     }
   }
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newPassword = e.target.value
+    setPassword(newPassword)
+    setIsValidPassword(newPassword.trim() !== '')
+  }
+
   const handlePasswordSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    if (password.trim() !== '') {
+    if (isValidPassword) {
       // Handle login logic here
       console.log('Login attempted with:', { email, password })
       // Navigate to home page
@@ -46,13 +65,17 @@ export default function LoginPage() {
                 placeholder="E-Mail-Adresse"
                 className="w-full px-3 py-2 border rounded-md"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 required
               />
             </div>
             <button
               type="submit"
-              className={`w-full py-2 rounded-md bg-[${colors.pine['Pine Green']}] text-white hover:bg-[${colors.pine['Pine Green']}]/80`}
+              className={`w-full py-2 rounded-md text-white ${
+                isValidEmail ? 'hover:opacity-80' : 'opacity-50 cursor-not-allowed'
+              }`}
+              style={{ backgroundColor: isValidEmail ? colors.pine['Pine Green'] : '#A0AEC0' }}
+              disabled={!isValidEmail}
             >
               Weiter
             </button>
@@ -76,7 +99,7 @@ export default function LoginPage() {
                 placeholder="Passwort*"
                 className="w-full px-3 py-2 border rounded-md"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={handlePasswordChange}
                 required
               />
               <button
@@ -97,7 +120,11 @@ export default function LoginPage() {
             </div>
             <button
               type="submit"
-              className={`w-full py-2 rounded-md bg-[${colors.pine['Pine Green']}] text-white hover:bg-[${colors.pine['Pine Green']}]/80`}
+              className={`w-full py-2 rounded-md text-white ${
+                isValidPassword ? 'hover:opacity-80' : 'opacity-50 cursor-not-allowed'
+              }`}
+              style={{ backgroundColor: isValidPassword ? colors.pine['Pine Green'] : '#A0AEC0' }}
+              disabled={!isValidPassword}
             >
               Fortfahren
             </button>
