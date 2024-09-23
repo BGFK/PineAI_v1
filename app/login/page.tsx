@@ -45,8 +45,8 @@ export default function LoginPage() {
     if (isValidPassword) {
       // Handle login logic here
       console.log('Login attempted with:', { email, password })
-      // Navigate to home page
-      router.push('/home')
+      // Navigate to PineChat page
+      router.push('/PineChat')
     }
   }
 
