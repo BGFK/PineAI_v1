@@ -16,7 +16,7 @@ import { Chat, Message } from '@/types'
 import { colors } from '@/components/ui/colors'
 import { cn } from "@/lib/utils"  // Make sure this utility is imported
 import dynamic from 'next/dynamic'
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Popover, PopoverContent, PopoverTrigger, SettingsPopoverContent } from "@/components/ui/popover"
 import { OptionsIcon, PenSquareIcon, ArchiveIcon, TrashIcon } from '@/components/ui/icons'
 
 const DynamicChatInterface = dynamic(() => import('../components/ChatInterface'), { ssr: false })
@@ -54,6 +54,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const [localChatHistory, setLocalChatHistory] = useState<Chat[]>([])
   const [showNewChatTooltip, setShowNewChatTooltip] = useState(false)
   const [openPopoverId, setOpenPopoverId] = useState<string | null>(null)
+  const [openSettingsPopover, setOpenSettingsPopover] = useState(false);
 
   useEffect(() => {
     // Load chat history from localStorage when the component mounts
@@ -75,13 +76,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     setOpenPopoverId(null);
   }, [chatHistory]);
 
-  const handleHomeClick = () => {
-    // Navigate to the home page (app/home/page.tsx)
-    router.push('/home')
+  const handlePineChatClick = () => {
+    // Navigate to the PineChat page (app/pine-chat/page.tsx)
+    router.push('/pine-chat')
   }
 
   const handleSettingsClick = () => {
-    router.push('/settings')
+    setOpenSettingsPopover(!openSettingsPopover);
   }
 
   const handleChatClick = (chatId: string) => {
@@ -105,8 +106,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     return 'Current Chat';
   };
 
-  const handleFileManagementClick = () => {
-    router.push('/file-management')
+  const handleFilesClick = () => {
+    router.push('/files')
   }
 
   const handleNewChat = () => {
@@ -125,7 +126,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       setCurrentChatId(null);
       setMessages([]);
       // Instead of creating a new chat, we'll reset the state to show the welcome message
-      router.push('/home'); // This will force a re-render of the main page
+      router.push('/pine-chat'); // This will force a re-render of the main page
     }
   }
 
@@ -143,12 +144,12 @@ const Sidebar: React.FC<SidebarProps> = ({
           />
         </div>
         <div className="space-y-0">
-          {/* Home button */}
+          {/* PineChat button */}
           <div className="flex items-center justify-between w-full bg-gray-50 hover:bg-gray-100 rounded-md h-[38px]">
             <Button
               className="flex-grow flex justify-start items-center text-left py-1 px-3 h-full"
               variant="ghost"
-              onClick={handleHomeClick}
+              onClick={handlePineChatClick}
             >
               <HomeIcon className="h-4 w-4 mr-3" />
               <Heading>PineChat</Heading>
@@ -170,11 +171,11 @@ const Sidebar: React.FC<SidebarProps> = ({
             </div>
           </div>
           
-          {/* File Management button */}
+          {/* Files button */}
           <Button
             className="w-full justify-start text-left hover:bg-gray-100 py-1 px-3 h-[38px]"
             variant="ghost"
-            onClick={handleFileManagementClick}
+            onClick={handleFilesClick}
           >
             <FolderIcon className="mr-3 h-4 w-4" />
             <Heading>Files</Heading>
@@ -249,14 +250,22 @@ const Sidebar: React.FC<SidebarProps> = ({
           <UserIcon className="mr-3 h-4 w-5" />
           <Heading>user@example.com</Heading>
         </Button>
-        <Button 
-          className="w-full justify-start text-left font-normal hover:bg-gray-100 py-1 px-3 h-[38px]" 
-          variant="ghost"
-          onClick={handleSettingsClick}
+        <Popover 
+          open={openSettingsPopover} 
+          onOpenChange={setOpenSettingsPopover}
         >
-          <SettingsIcon className="mr-3 h-4 w-5" />
-          <Heading>Settings</Heading>
-        </Button>
+          <PopoverTrigger asChild>
+            <Button 
+              className="w-full justify-start text-left font-normal hover:bg-gray-100 py-1 px-3 h-[38px]" 
+              variant="ghost"
+              onClick={handleSettingsClick}
+            >
+              <SettingsIcon className="mr-3 h-4 w-5" />
+              <Heading>Settings</Heading>
+            </Button>
+          </PopoverTrigger>
+          <SettingsPopoverContent />
+        </Popover>
       </div>
     </div>
   )

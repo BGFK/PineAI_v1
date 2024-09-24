@@ -7,7 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { PaperclipIcon, AddIcon, DiscardIcon } from '@/components/ui/icons'
-import { ChatMessage } from '../PineChat/page' // Import ChatMessage from page.tsx
+import { ChatMessage } from '../pine-chat/page' // Import ChatMessage from page.tsx
 import { streamMessage, ChatMessage as StreamChatMessage } from '../../actions/stream-message';
 import { chatText } from '@/components/ui/typography'
 import { colors } from '@/components/ui/colors'
@@ -103,9 +103,9 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
               onChange={(e) => setInputMessage(e.target.value)}
               onKeyPress={handleKeyPress}
               placeholder="Ask about your financial data..."
-              className={`flex-1 ${chatText} text-${colors.pine['Pine Main Text']}`}
+              className={`flex-1 ${chatText} text-[#204B44]`}
             />
-            <Button onClick={() => onSendMessage(inputMessage)} className={`bg-[${colors.pine['Pine Green']}] hover:bg-[#1a3e39] text-white ${chatText}`}>
+            <Button onClick={() => onSendMessage(inputMessage)} className={`bg-[#204B44] hover:bg-[#1a3e39] text-white ${chatText}`}>
               Send
             </Button>
           </div>
